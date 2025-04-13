@@ -1,115 +1,109 @@
 # backend/api/data_fetching/house_of_commons.py
 """
-Module for fetching bills and votes from the House of Commons.
-Supports fetching data from Open Parliament API or scraping the Parliament website.
+Module for fetching bills and votes from the House of Commons using the Open Parliament API.
 """
 
 import requests
 from typing import List, Dict, Optional
 from datetime import datetime
+import time
 
+# Replace with your actual email
+USER_EMAIL = "your.email@example.com"
 
 def fetch_bills(start_year: int = 2006) -> List[Dict]:
     """
-    Fetch bills introduced in the House of Commons since the specified year.
+    Fetch bills introduced in the House of Commons since the specified year using the Open Parliament API.
 
     Args:
         start_year (int): Year to start fetching bills from (default: 2006).
 
     Returns:
-        List[Dict]: List of bill details, each containing:
-            - 'id': Bill identifier
-            - 'title': Bill title
-            - 'description': Bill description
-            - 'status': Current status
-            - 'introduced_by': Politician ID (placeholder)
-            - 'created_at': Timestamp
+        List[Dict]: List of bill details with fields like 'url', 'number', 'title', etc.
     """
-    base_url = "https://openparliament.ca/api/bills/"  # Placeholder API endpoint
+    base_url = "https://openparliament.ca/api/bills/"
+    headers = {"API-Version": "v1", "User-Agent": USER_EMAIL}
+    params = {"introduced_date__gte": f"{start_year}-01-01"}  # Filter bills since start_year
     bills = []
 
     try:
-        # Placeholder: Fetch bills from API
-        response = requests.get(base_url, params={"year__gte": start_year}, timeout=10)
+        response = requests.get(base_url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
-        raw_bills = response.json()
+        raw_bills = response.json()  # Expecting a list of bills
 
         for bill in raw_bills:
             bills.append({
-                "id": bill.get("id", 0),
-                "title": bill.get("title", "Unknown"),
-                "description": bill.get("description", "No description"),
+                "url": bill.get("url", ""),  # Unique identifier
+                "number": bill.get("number", "Unknown"),  # e.g., "C-10"
+                "title": bill.get("name", "Unknown"),
+                "description": bill.get("summary", "No description"),
                 "status": bill.get("status", "proposed"),
-                "introduced_by": bill.get("sponsor_id", 1),  # Placeholder
+                "introduced_by": bill.get("sponsor", ""),  # Politician URL
+                "introduced_date": bill.get("introduced_date", ""),
                 "created_at": datetime.utcnow().isoformat()
             })
+        time.sleep(0.5)  # Avoid rate limits
 
     except requests.RequestException as e:
         print(f"Error fetching bills: {e}")
-        # Return dummy data for testing
         bills.append({
-            "id": 1,
+            "url": "/bills/1/",
+            "number": "C-1",
             "title": "Sample Bill",
             "description": "A sample bill for testing",
             "status": "proposed",
-            "introduced_by": 1,
+            "introduced_by": "/politicians/1/",
+            "introduced_date": "2006-01-01",
             "created_at": datetime.utcnow().isoformat()
         })
 
     return bills
 
-
-def fetch_votes(bill_id: Optional[int] = None) -> List[Dict]:
+def fetch_votes(bill_url: Optional[str] = None) -> List[Dict]:
     """
-    Fetch votes cast on bills in the House of Commons.
+    Fetch votes cast on bills in the House of Commons using the Open Parliament API.
 
     Args:
-        bill_id (Optional[int]): ID of the bill to fetch votes for. If None,
-            fetches all available votes.
+        bill_url (Optional[str]): URL of the bill (e.g., "/bills/42-1/C-10/"). If None, fetches all votes.
 
     Returns:
-        List[Dict]: List of vote details, each containing:
-            - 'id': Vote identifier
-            - 'politician_id': ID of the politician who voted
-            - 'bill_id': ID of the bill
-            - 'vote': Vote cast ('yes', 'no', 'abstain')
-            - 'created_at': Timestamp
+        List[Dict]: List of vote details with fields like 'url', 'politician_url', etc.
     """
-    base_url = "https://openparliament.ca/api/votes/"  # Placeholder API endpoint
+    base_url = "https://openparliament.ca/api/votes/"
+    headers = {"API-Version": "v1", "User-Agent": USER_EMAIL}
+    params = {"bill": bill_url} if bill_url else {}
     votes = []
 
     try:
-        params = {"bill_id": bill_id} if bill_id else {}
-        response = requests.get(base_url, params=params, timeout=10)
+        response = requests.get(base_url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         raw_votes = response.json()
 
         for vote in raw_votes:
             votes.append({
-                "id": vote.get("id", 0),
-                "politician_id": vote.get("politician_id", 1),  # Placeholder
-                "bill_id": vote.get("bill_id", bill_id or 1),
+                "url": vote.get("url", ""),
+                "politician_url": vote.get("politician_url", ""),
+                "bill_url": vote.get("bill_url", bill_url or ""),
                 "vote": vote.get("vote", "yes"),
                 "created_at": datetime.utcnow().isoformat()
             })
+        time.sleep(0.5)  # Avoid rate limits
 
     except requests.RequestException as e:
         print(f"Error fetching votes: {e}")
-        # Return dummy data for testing
         votes.append({
-            "id": 1,
-            "politician_id": 1,
-            "bill_id": bill_id or 1,
+            "url": "/votes/1/",
+            "politician_url": "/politicians/1/",
+            "bill_url": bill_url or "/bills/1/",
             "vote": "yes",
             "created_at": datetime.utcnow().isoformat()
         })
 
     return votes
 
-
 # Example usage:
 # if __name__ == "__main__":
 #     bills = fetch_bills(start_year=2006)
-#     votes = fetch_votes(bill_id=1)
+#     votes = fetch_votes(bill_url="/bills/42-1/C-10/")
 #     print(bills)
 #     print(votes)

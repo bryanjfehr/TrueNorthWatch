@@ -1,59 +1,56 @@
 # backend/api/data_fetching/politicians.py
 """
-Module for fetching politician data.
-Supports fetching current and historical politicians from Parliament or other sources.
+Module for fetching politician data from the Open Parliament API.
 """
 
 import requests
-from typing import List, Dict, Optional
+from typing import List, Dict
 from datetime import datetime
+import time
 
+USER_EMAIL = "your.email@example.com"
 
 def fetch_politicians(start_year: int = 2006) -> List[Dict]:
     """
-    Fetch politicians who served since the specified year.
+    Fetch politicians who served since the specified year from the Open Parliament API.
 
     Args:
-        start_year (int): Year to start fetching politicians from (default: 2006).
+        start_year (int): Year to filter politicians from (default: 2006). Note: Filtering done post-fetch.
 
     Returns:
-        List[Dict]: List of politician details, each containing:
-            - 'id': Politician identifier
-            - 'name': Full name
-            - 'party_id': ID of the party (placeholder)
-            - 'position': Current role (e.g., 'MP', 'Minister')
-            - 'created_at': Timestamp
+        List[Dict]: List of politician details with fields like 'url', 'name', etc.
     """
-    base_url = "https://openparliament.ca/api/politicians/"  # Placeholder API endpoint
+    base_url = "https://openparliament.ca/api/politicians/"
+    headers = {"API-Version": "v1", "User-Agent": USER_EMAIL}
     politicians = []
 
     try:
-        response = requests.get(base_url, params={"year__gte": start_year}, timeout=10)
+        response = requests.get(base_url, headers=headers, timeout=10)
         response.raise_for_status()
         raw_politicians = response.json()
 
         for pol in raw_politicians:
+            # Note: Filter by start_year in application logic if term dates are available
             politicians.append({
-                "id": pol.get("id", 0),
+                "url": pol.get("url", ""),
                 "name": pol.get("name", "Unknown"),
-                "party_id": pol.get("party_id", 1),  # Placeholder
+                "party_url": pol.get("party", ""),
                 "position": pol.get("position", "MP"),
                 "created_at": datetime.utcnow().isoformat()
             })
+        time.sleep(0.5)  # Avoid rate limits
 
     except requests.RequestException as e:
         print(f"Error fetching politicians: {e}")
-        # Return dummy data for testing
         politicians.append({
-            "id": 1,
+            "url": "/politicians/1/",
             "name": "John Doe",
-            "party_id": 1,
+            "party_url": "/parties/liberal/",
             "position": "MP",
             "created_at": datetime.utcnow().isoformat()
         })
 
     return politicians
-
 
 # Example usage:
 # if __name__ == "__main__":

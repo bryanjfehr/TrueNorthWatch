@@ -6,7 +6,7 @@ Ensures fetch_politicians returns expected data and handles errors.
 
 from datetime import datetime
 import pytest
-from backend.data_fetching.politicians import fetch_politicians
+from backend.api.data_fetching.politicians import fetch_politicians
 
 
 def test_fetch_politicians_success(mock_requests):
@@ -17,9 +17,9 @@ def test_fetch_politicians_success(mock_requests):
     url = "https://openparliament.ca/api/politicians/"
     mock_data = [
         {
-            "id": 1,
+            "url": "/politicians/123/",
             "name": "Jane Smith",
-            "party_id": 2,
+            "party": "/parties/liberal/",
             "position": "Minister"
         }
     ]
@@ -30,9 +30,9 @@ def test_fetch_politicians_success(mock_requests):
 
     # Assertions
     assert len(result) == 1
-    assert result[0]["id"] == 1
+    assert result[0]["url"] == "/politicians/123/"
     assert result[0]["name"] == "Jane Smith"
-    assert result[0]["party_id"] == 2
+    assert result[0]["party_url"] == "/parties/liberal/"
     assert result[0]["position"] == "Minister"
     assert "created_at" in result[0]
     assert datetime.fromisoformat(result[0]["created_at"])
@@ -51,8 +51,8 @@ def test_fetch_politicians_request_error(mock_requests):
 
     # Assertions
     assert len(result) == 1
-    assert result[0]["id"] == 1
+    assert result[0]["url"] == "/politicians/1/"
     assert result[0]["name"] == "John Doe"
-    assert result[0]["party_id"] == 1
+    assert result[0]["party_url"] == "/parties/liberal/"
     assert result[0]["position"] == "MP"
     assert "created_at" in result[0]

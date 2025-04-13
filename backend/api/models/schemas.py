@@ -8,7 +8,6 @@ ensuring type safety and proper serialization of SQLAlchemy models.
 from pydantic import BaseModel
 from datetime import datetime
 
-
 class PartySchema(BaseModel):
     """
     Schema representing a political party.
@@ -16,18 +15,36 @@ class PartySchema(BaseModel):
     Attributes:
         id (int): Unique identifier for the party.
         name (str): Name of the political party.
-        platform (str): Text describing the party's platform and key positions.
         created_at (datetime): Timestamp when the party was added to the database.
     """
     id: int
     name: str
-    platform: str
     created_at: datetime
 
     class Config:
-        # Enable ORM mode to allow Pydantic to work with SQLAlchemy models
         orm_mode = True
 
+class PlatformCategorySchema(BaseModel):
+    """
+    Schema representing a categorized stance of a political party's platform.
+
+    Attributes:
+        id (int): Unique identifier for the category stance.
+        party_id (int): Foreign key to the Party table.
+        election_year (int): Year of the election campaign.
+        category (str): Category of the stance (e.g., 'Climate Change and Energy').
+        stance (str): Text describing the party's stance in that category.
+        created_at (datetime): Timestamp when the record was created.
+    """
+    id: int
+    party_id: int
+    election_year: int
+    category: str
+    stance: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 class PoliticianSchema(BaseModel):
     """
@@ -48,7 +65,6 @@ class PoliticianSchema(BaseModel):
 
     class Config:
         orm_mode = True
-
 
 class BillSchema(BaseModel):
     """
@@ -72,7 +88,6 @@ class BillSchema(BaseModel):
     class Config:
         orm_mode = True
 
-
 class VoteSchema(BaseModel):
     """
     Schema representing a vote cast by a politician on a bill.
@@ -92,8 +107,3 @@ class VoteSchema(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-# Example usage:
-# These schemas will be used in FastAPI routes to validate incoming data
-# and serialize database objects for responses.
