@@ -1,0 +1,4 @@
+backend/venv/
+tests/__pycache__/
+tests/data_fetching/__pycache__/
+backend/data_fetching/__pycache__/

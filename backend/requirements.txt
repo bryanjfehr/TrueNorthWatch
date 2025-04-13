@@ -1,0 +1,22 @@
+# requirements.txt
+#
+# Dependencies for your project.
+# Install with: pip install -r requirements.txt
+#
+# Note: For torch with GPU support, after installing other dependencies, run:
+# pip install torch==2.1.0+cu121 -f https://download.pytorch.org/whl/torch_stable.html
+# Replace 'cu121' with your CUDA version (e.g., 'cu118' for CUDA 11.8) based on your Windows NVIDIA drivers.
+# Visit https://pytorch.org/get-started/locally/ to confirm your CUDA version and adjust accordingly.
+# The version below (torch==2.1.0) installs the CPU-only version by default.
+
+fastapi==0.115.0              # API framework, supports Python 3.8+
+uvicorn==0.30.1               # ASGI server for FastAPI, supports Python 3.8+
+sqlalchemy==2.0.35            # ORM for database interactions, supports Python 3.7+
+psycopg2-binary==2.9.9        # PostgreSQL adapter, supports Python 3.7+
+requests==2.32.3              # HTTP requests, supports Python 3.6+
+beautifulsoup4==4.12.3        # Web scraping, supports Python 3.6+
+torch==2.1.0                  # Machine learning (CPU version), supports Python 3.8-3.11; see GPU note above
+transformers==4.44.2          # BERT and transformer models, compatible with torch 2.1.0
+pytest==8.3.3                 # Unit testing framework, supports Python 3.9+
+google-auth==2.35.0           # Authentication for Google APIs, supports Python 3.7+
+google-api-python-client==2.146.0  # Google API client library, supports Python 3.7+
