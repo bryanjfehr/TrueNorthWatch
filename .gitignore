@@ -2,3 +2,6 @@ backend/venv/
 tests/__pycache__/
 tests/data_fetching/__pycache__/
 backend/data_fetching/__pycache__/
+tests/integration/__pycache__/
+backend/api/data_fetching/__pycache__/
+backend/__pycache__/
